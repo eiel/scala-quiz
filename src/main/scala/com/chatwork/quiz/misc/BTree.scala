@@ -54,18 +54,31 @@ sealed trait Node {
  */
 case class Branch(left: Node, value: Int, right: Node) extends Node {
 
-  val size: Int = ???
+  val size: Int = left.size + right.size + 1
 
-  val sum: Int = ???
+  val sum: Int = left.sum + right.sum + value
 
-  val avg: Double = ???
+  val avg: Double = sum / size
 
-  val max: Int = ???
+  val max: Int = right.max
 
-  val min: Int = ???
+  val min: Int = left.min
 
-  def find(value: Int): Option[Node] = ???
+  def find(value: Int): Option[Node] = value match {
+    case this.value => Some(this)
+    case _ if this.value < value => right.find(value)
+    case _ if this.value > value => left.find(value)
+  }
 
+}
+
+object Branch {
+  def apply(values: List[Int]): Node = values match {
+    case x :: Nil => Leaf(x)
+    case _ => values.splitAt(values.size/2) match {
+      case (left, value :: right) => Branch(Branch(left),value, Branch(right))
+    }
+  }
 }
 
 /**
@@ -75,17 +88,20 @@ case class Branch(left: Node, value: Int, right: Node) extends Node {
  */
 case class Leaf(value: Int) extends Node {
 
-  val size: Int = ???
+  val size: Int = 1
 
-  val sum: Int = ???
+  val sum: Int = value
 
-  val avg: Double = ???
+  val avg: Double = value
 
-  val max: Int = ???
+  val max: Int = value
 
-  val min: Int = ???
+  val min: Int = value
 
-  def find(value: Int): Option[Node] = ???
+  def find(value: Int): Option[Node] = value match {
+    case this.value => Some(this)
+    case _ => None
+  }
 
 }
 
@@ -121,7 +137,7 @@ object BTree {
    * @param values ノードに格納する値の集合
    * @return [[BTree]]
    */
-  def apply(values: List[Int]): BTree = ???
+  def apply(values: List[Int]): BTree = BTree(Branch(values))
 
 }
 
